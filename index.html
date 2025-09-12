@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>何文碩 | 交通運輸與營運分析專家</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Professional -->
+    <!-- Application Structure Plan: 本應用程式採用由上而下的儀表板佈局，旨在引導使用者（招聘經理）清晰地了解候選人的專業價值。結構依次為：1. 專業摘要：開門見山，立即建立專業形象。2. 關鍵成就儀表板：用量化數據突出核心貢獻，吸引眼球。3. 互動式職涯時間軸與詳細內容：將靜態的經歷轉化為可探索的內容，使用者點擊不同公司即可查看對應的職責與專案，提升了使用者體驗與資訊吸收效率。4. 核心技能圖表：將技能視覺化，使其更直觀易懂。此結構優先考慮影響力與互動性，而非死板地複製履歷順序，更能有效地傳達候選人的競爭力。 -->
+    <!-- Visualization & Content Choices: 1. 關鍵成就 (用戶成長33%, 滿意度95%+, 工時縮減15%) -> 目標: 資訊傳達、留下深刻印象 -> 呈現方式: 使用大型數字和圖示的資訊卡片 (HTML/Tailwind) -> 互動: 無，以靜態方式強調視覺衝擊 -> 理由: 關鍵數據應最直接、最快速地被看見。 2. 職涯路徑 -> 目標: 組織資訊、提供細節 -> 呈現方式: 垂直時間軸按鈕 (HTML/Tailwind) 搭配內容顯示區 -> 互動: 點擊按鈕 (JS) 切換顯示不同公司的詳細職責與專案 -> 理由: 互動式探索比長篇文字更具吸引力，且能保持頁面整潔。 3. 核心技能 -> 目標: 比較與告知 -> 呈現方式: 水平條形圖 (Chart.js/Canvas) -> 互動: 圖表載入時有動畫效果 -> 理由: 圖表能直觀地展示技能熟練度，比純文字列表更生動。 -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #F8F7F4;
+            color: #333333;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 350px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #A0AEC0;
+            border: 4px solid #F8F7F4;
+        }
+        .timeline-item.active::before {
+            background-color: #4A90E2;
+        }
+        .timeline-line {
+            position: absolute;
+            left: -21px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: #E2E8F0;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="container mx-auto p-4 md:p-8 max-w-6xl">
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800">何文碩</h1>
+            <p class="text-xl md:text-2xl text-[#4A90E2] mt-2 font-semibold">交通運輸與營運分析專家</p>
+            <div class="flex justify-center items-center space-x-4 mt-2 text-gray-600">
+                <p>📞 +886 919 988538</p>
+                <p>📧 hippop3c@gmail.com</p>
+                <p>🏠 204 基隆市安樂路一段 208 號五樓</p>
+            </div>
+            <p class="mt-4 max-w-3xl mx-auto text-gray-600">
+                超過八年的交通運輸與營運企劃經驗，擅長運用數據分析優化營運效能、提升顧客滿意度，並精通專案管理與跨部門協調。在 YouBike 任職期間，成功將用戶數提升 33%、顧客滿意度維持 95% 以上，並將人均工時降低 15%。渴望將我的數據分析與專案管理能力應用於新領域，為貴公司帶來更大的價值。
+            </p>
+        </header>
+
+        <main>
+            <section id="key-achievements" class="mb-16">
+                <h2 class="text-3xl font-bold text-center mb-8 text-gray-700">關鍵成就儀表板</h2>
+                <div class="intro-text max-w-3xl mx-auto text-center text-gray-600 mb-8">
+                    <p>此儀表板總結了我在過去職位中達成的核心量化指標。這些數據直接反映了我的策略規劃與執行能力，如何為公司帶來實質的營運成長與效率提升。</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                    <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-[#4A90E2]">
+                        <div class="text-5xl font-bold text-[#4A90E2]">33%</div>
+                        <p class="mt-2 text-gray-600 font-semibold">用戶人數增長</p>
+                        <p class="text-sm text-gray-500 mt-1">透過數據驅動的車輛配置優化</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-green-500">
+                        <div class="text-5xl font-bold text-green-500">95%+</div>
+                        <p class="mt-2 text-gray-600 font-semibold">顧客滿意度</p>
+                        <p class="text-sm text-gray-500 mt-1">經由建立科學化的選點指標模型</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-orange-500">
+                        <div class="text-5xl font-bold text-orange-500">15%</div>
+                        <p class="mt-2 text-gray-600 font-semibold">人均工時縮減</p>
+                        <p class="text-sm text-gray-500 mt-1">導入自動化系統與流程改善</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="career-path" class="mb-16">
+                <h2 class="text-3xl font-bold text-center mb-8 text-gray-700">互動式職涯時間軸</h2>
+                 <div class="intro-text max-w-3xl mx-auto text-center text-gray-600 mb-12">
+                    <p>這是一個互動式的職業生涯概覽。請點擊左側時間軸上的公司名稱，右側將會顯示我在該公司的詳細職責、執行的專案以及具體貢獻。這種方式能幫助您更深入地了解我的專業成長軌跡。</p>
+                </div>
+                <div class="md:flex md:space-x-12">
+                    <div class="md:w-1/3 mb-8 md:mb-0">
+                        <div class="relative pl-8">
+                            <div class="timeline-line"></div>
+                            <button id="btn-yuzhi" class="relative w-full text-left p-3 mb-4 timeline-item rounded-lg transition-all duration-300">
+                                <p class="font-bold text-lg">輿智科技</p>
+                                <p class="text-sm text-gray-500">專員 | 2015 - 2025</p>
+                            </button>
+                            <button id="btn-youbike" class="relative w-full text-left p-3 timeline-item rounded-lg transition-all duration-300">
+                                <p class="font-bold text-lg">微笑單車 (YouBike)</p>
+                                <p class="text-sm text-gray-500">營運企劃高級專員 | 2013 - 2015</p>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="job-details" class="md:w-2/3 bg-white p-6 rounded-lg shadow-md">
+                    </div>
+                </div>
+            </section>
+
+            <section id="skills-visualization" class="mb-16">
+                <h2 class="text-3xl font-bold text-center mb-8 text-gray-700">核心技能</h2>
+                <div class="intro-text max-w-3xl mx-auto text-center text-gray-600 mb-8">
+                    <p>以下圖表展示了我的核心專業技能熟練度。這些技能是我在過去的專案與日常工作中，用以解決問題、創造價值的關鍵工具。圖表將複雜的技能組以直觀的方式呈現，讓您一目了然。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="chart-container">
+                        <canvas id="skillsChart"></canvas>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="text-center pt-8 border-t border-gray-200">
+            <h3 class="text-2xl font-bold text-gray-700 mb-4">教育背景</h3>
+            <div class="flex flex-col md:flex-row justify-center items-center md:space-x-8 space-y-4 md:space-y-0 text-gray-600">
+                <div class="text-center">
+                    <p class="font-semibold">淡江大學 | 運輸管理學系</p>
+                    <p class="text-sm text-gray-500">2012 年畢業</p>
+                </div>
+                <div class="text-center">
+                    <p class="font-semibold">真理大學 | 數學系</p>
+                    <p class="text-sm text-gray-500">2009 年畢業</p>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    <script>
+        const jobData = {
+            youbike: {
+                title: '微笑單車 (YouBike)',
+                position: '營運企劃高級專員',
+                content: `
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-semibold text-lg text-gray-800">營運優化與績效管理</h4>
+                            <ul class="list-disc list-inside mt-2 text-gray-600 space-y-1">
+                                <li><b>策略規劃：</b>運用數據分析，根據不同時段與區域的騎乘關係，建立預先車輛配置模型，有效減少無車可借還的狀況。</li>
+                                <li><b>成果：</b>成功使 YouBike 使用人數較同期成長 <b>33%</b>，並顯著增加營收。</li>
+                                <li><b>顧客滿意度：</b>建立選點指標模型，使顧客滿意度維持 <b>95% 以上</b>。</li>
+                                <li><b>數據分析：</b>彙整每日營運數據，並進行圖表化分析，為決策層提供改善策略與方向。</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-lg text-gray-800">專案管理與流程改善</h4>
+                            <ul class="list-disc list-inside mt-2 text-gray-600 space-y-1">
+                                <li><b>系統導入：</b>主導建立自動化與調度系統，成功將人均工時縮減 <b>15%</b>。</li>
+                                <li><b>專案負責人：</b>擔任 YouBike 2.0 專案與淨零調度專案的負責人，從規劃到執行皆能獨立完成。</li>
+                                <li><b>標準作業流程 (SOP)：</b>制定內部事件應對 SOP，並建立跨組協調機制，提升團隊運作效率。</li>
+                            </ul>
+                        </div>
+                    </div>
+                `
+            },
+            yuzhi: {
+                title: '輿智科技',
+                position: '專員',
+                content: `
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-semibold text-lg text-gray-800">交通專案執行與分析</h4>
+                            <ul class="list-disc list-inside mt-2 text-gray-600 space-y-1">
+                                <li><b>專案參與：</b>參與多項大型政府交通採購標案，負責車流量調查、旅行時間與旅次分析。</li>
+                                <li><b>專業分析：</b>進行交通號誌優化與交通衝擊評估，為政府單位提供數據支持與解決方案。</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-lg text-gray-800">主要參與專案</h4>
+                            <ul class="list-disc list-inside mt-2 text-gray-600 space-y-1">
+                                <li>104、105 年台南市公車優先號誌（綠、紅、藍幹線）</li>
+                                <li>102-104 年「嘉義縣幹道時制重整及設備維運計畫」</li>
+                                <li>基隆市市區汽車客運業營運及服務評鑑</li>
+                            </ul>
+                        </div>
+                    </div>
+                `
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const btnYuzhi = document.getElementById('btn-yuzhi');
+            const btnYoubike = document.getElementById('btn-youbike');
+            const detailsContainer = document.getElementById('job-details');
+
+            function updateJobDetails(jobKey) {
+                const data = jobData[jobKey];
+                detailsContainer.innerHTML = `
+                    <h3 class="text-2xl font-bold text-gray-800 mb-1">${data.title}</h3>
+                    <p class="text-md text-[#4A90E2] font-semibold mb-4">${data.position}</p>
+                    ${data.content}
+                `;
+
+                if (jobKey === 'yuzhi') {
+                    btnYuzhi.classList.add('active', 'bg-blue-100');
+                    btnYoubike.classList.remove('active', 'bg-blue-100');
+                } else {
+                    btnYoubike.classList.add('active', 'bg-blue-100');
+                    btnYuzhi.classList.remove('active', 'bg-blue-100');
+                }
+            }
+
+            btnYuzhi.addEventListener('click', () => updateJobDetails('yuzhi'));
+            btnYoubike.addEventListener('click', () => updateJobDetails('youbike'));
+            
+            updateJobDetails('yuzhi');
+
+            const ctx = document.getElementById('skillsChart').getContext('2d');
+            const skillsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['數據分析 (Excel, R)', '專案管理', '營運規劃', 'Google Studio', '流程改善 (SOP)'],
+                    datasets: [{
+                        label: '技能熟練度',
+                        data: [95, 90, 90, 85, 88],
+                        backgroundColor: [
+                            'rgba(74, 144, 226, 0.6)',
+                            'rgba(34, 197, 94, 0.6)',
+                            'rgba(249, 115, 22, 0.6)',
+                            'rgba(234, 179, 8, 0.6)',
+                            'rgba(139, 92, 246, 0.6)'
+                        ],
+                        borderColor: [
+                             'rgba(74, 144, 226, 1)',
+                             'rgba(34, 197, 94, 1)',
+                            'rgba(249, 115, 22, 1)',
+                            'rgba(234, 179, 8, 1)',
+                            'rgba(139, 92, 246, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` 熟練度: ${context.raw}%`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 100,
+                             ticks: {
+                                callback: function(value) {
+                                    return value + '%'
+                                }
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                autoSkip: false,
+                                callback: function(value, index, values) {
+                                    const label = this.getLabelForValue(value);
+                                    if (label.length > 16) {
+                                        return label.substring(0, 16) + '...';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
