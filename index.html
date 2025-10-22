@@ -3,305 +3,417 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>何文碩 | 擅長交通運輸與營運分析</title>
+    <title>何文碩 | 交通運輸與營運分析專家 - 一頁式互動履歷</title>
+    <!-- 載入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- 載入 Noto Sans TC 字體 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
-    <!-- Chosen Palette: Calm Professional -->
-    <!-- Application Structure Plan: 本應用程式採用由上而下的儀表板佈局，旨在引導使用者（招聘經理）清晰地了解候選人的專業價值。結構依次為：1. 專業摘要：開門見山，立即建立專業形象。2. 關鍵成就儀表板：用量化數據突出核心貢獻，吸引眼球。3. 互動式職涯時間軸與詳細內容：將靜態的經歷轉化為可探索的內容，使用者點擊不同公司即可查看對應的職責與專案，提升了使用者體驗與資訊吸收效率。4. 核心技能圖表：將技能視覺化，使其更直觀易懂。此結構優先考慮影響力與互動性，而非死板地複製履歷順序，更能有效地傳達候選人的競爭力。 -->
-    <!-- Visualization & Content Choices: 1. 關鍵成就 (用戶成長33%, 滿意度95%+, 工時縮減15%) -> 目標: 資訊傳達、留下深刻印象 -> 呈現方式: 使用大型數字和圖示的資訊卡片 (HTML/Tailwind) -> 互動: 無，以靜態方式強調視覺衝擊 -> 理由: 關鍵數據應最直接、最快速地被看見。 2. 職涯路徑 -> 目標: 組織資訊、提供細節 -> 呈現方式: 垂直時間軸按鈕 (HTML/Tailwind) 搭配內容顯示區 -> 互動: 點擊按鈕 (JS) 切換顯示不同公司的詳細職責與專案 -> 理由: 互動式探索比長篇文字更具吸引力，且能保持頁面整潔。 3. 核心技能 -> 目標: 比較與告知 -> 呈現方式: 水平條形圖 (Chart.js/Canvas) -> 互動: 圖表載入時有動畫效果 -> 理由: 圖表能直觀地展示技能熟練度，比純文字列表更生動。 -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <!-- 載入 Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
     <style>
+        /* 核心品牌色：深翡翠綠/專業深綠色 */
+        :root {
+            --primary-color: #047857; /* emerald-700 */
+            --accent-color: #34D399;  /* emerald-400 */
+        }
+        
+        /* 啟用平滑滾動 */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* 背景動畫漸層 */
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
         body {
             font-family: 'Noto Sans TC', sans-serif;
-            background-color: #F8F7F4;
-            color: #333333;
+            color: #1F2937;
+            /* 淺色柔和漸變背景 */
+            background: linear-gradient(-45deg, #F0FDF4, #ECFDF5, #D1FAE5); 
+            background-size: 400% 400%;
+            animation: gradient-shift 15s ease infinite;
         }
-        .chart-container {
-            position: relative;
-            width: 100%;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
-            height: 300px;
-            max-height: 350px;
+
+        /* 導航列活躍狀態 */
+        .nav-link.active {
+            font-weight: 900;
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
         }
-        @media (min-width: 768px) {
-            .chart-container {
-                height: 350px;
-            }
+        .nav-link {
+            transition: all 0.2s ease-in-out;
         }
-        .timeline-item::before {
-            content: '';
-            position: absolute;
-            left: -30px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background-color: #A0AEC0;
-            border: 4px solid #F8F7F4;
+
+        /* 互動卡片 3D 懸停效果 */
+        .interactive-card {
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
-        .timeline-item.active::before {
-            background-color: #4A90E2;
+        .interactive-card:hover {
+            transform: translateY(-10px) scale(1.005);
+            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.3);
         }
-        .timeline-line {
-            position: absolute;
-            left: -21px;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background-color: #E2E8F0;
+
+        /* 進度條動畫 */
+        .skill-bar-fill {
+            width: 0;
+            transition: width 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
+
+        /* 滾動動畫基底樣式 */
+        .scroll-animate {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 1s ease-out, transform 1s ease-out;
+        }
+        .scroll-animate.animate-active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
     </style>
 </head>
 <body class="antialiased">
+    
+    <!-- 固定導航列 -->
+    <nav id="navbar" class="sticky top-0 bg-white/95 backdrop-blur-sm shadow-xl z-10">
+        <div class="container mx-auto max-w-6xl p-4 flex justify-between items-center">
+            <h1 class="text-2xl font-black text-gray-800 tracking-wider">何文碩 | 履歷</h1>
+            <div class="space-x-4 flex text-sm md:text-lg font-medium">
+                <a href="#about" class="nav-link p-2 text-gray-600 hover:text-[--primary-color]">關於我</a>
+                <a href="#kpi" class="nav-link p-2 text-gray-600 hover:text-[--primary-color]">關鍵成就</a>
+                <a href="#career" class="nav-link p-2 text-gray-600 hover:text-[--primary-color]">職涯歷程</a>
+                <a href="#skills" class="nav-link p-2 text-gray-600 hover:text-[--primary-color]">核心技能</a>
+            </div>
+        </div>
+    </nav>
+    
     <div class="container mx-auto p-4 md:p-8 max-w-6xl">
 
-        <header class="text-center mb-12">
-            <h1 class="text-4xl md:text-5xl font-bold text-gray-800">何文碩</h1>
-            <p class="text-xl md:text-2xl text-[#4A90E2] mt-2 font-semibold">交通運輸與營運分析專家</p>
-            <div class="flex justify-center items-center space-x-4 mt-2 text-gray-600">
-                <p>📞 +886 919 988538</p>
-                <p>📧 hippop3c@gmail.com</p>
-                <p>🏠 204 基隆市</p>
-            </div>
-            <p class="mt-4 max-w-3xl mx-auto text-gray-600">
-                超過八年的交通運輸與營運企劃經驗，擅長運用數據分析優化營運效能、提升顧客滿意度，並精通專案管理與跨部門協調。在 YouBike 任職期間，成功將用戶數提升 33%、顧客滿意度維持 95% 以上，並將人均工時降低 15%。渴望將我的數據分析與專案管理能力應用於新領域，為貴公司帶來更大的價值。
-            </p>
-        </header>
-
-        <main>
-            <section id="key-achievements" class="mb-16">
-                <h2 class="text-3xl font-bold text-center mb-8 text-gray-700">關鍵成就儀表板</h2>
-                <div class="intro-text max-w-3xl mx-auto text-center text-gray-600 mb-8">
-                    <p>此儀表板總結了我在過去職位中達成的核心量化指標。這些數據直接反映了我的策略規劃與執行能力，如何為公司帶來實質的營運成長與效率提升。</p>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-                    <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-[#4A90E2]">
-                        <div class="text-5xl font-bold text-[#4A90E2]">33%</div>
-                        <p class="mt-2 text-gray-600 font-semibold">用戶人數增長</p>
-                        <p class="text-sm text-gray-500 mt-1">透過數據驅動的車輛配置優化</p>
+        <!-- SECTION 1: 關於我 / 封面區 (About Me) -->
+        <section id="about" class="pt-16 pb-20 scroll-animate">
+            <header class="bg-white p-8 md:p-16 rounded-xl shadow-2xl interactive-card">
+                <div class="flex flex-col md:flex-row items-center justify-between">
+                    <div class="text-center md:text-left md:w-2/3">
+                        <p class="text-xl text-gray-500 mb-1">您正在尋找</p>
+                        <h2 class="text-5xl md:text-6xl font-extrabold text-[#1F2937] tracking-tighter leading-tight">何文碩</h2>
+                        <p class="text-2xl md:text-3xl text-[--primary-color] mt-3 font-bold">數據驅動型交通運輸與營運分析專家</p>
+                        <p class="mt-6 max-w-xl text-gray-700 leading-relaxed text-lg">
+                            擁有超過十年的交通運輸與營運企劃經驗。擅長運用 **R 語言與數據分析**，將營運挑戰轉化為可量化的優化專案。我成功領導 YouBike 2.0 與淨零調度專案，並在政府大型標案中提供關鍵的數據決策支持。
+                        </p>
                     </div>
-                    <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-green-500">
-                        <div class="text-5xl font-bold text-green-500">95%+</div>
-                        <p class="mt-2 text-gray-600 font-semibold">顧客滿意度</p>
-                        <p class="text-sm text-gray-500 mt-1">經由建立科學化的選點指標模型</p>
-                    </div>
-                    <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-orange-500">
-                        <div class="text-5xl font-bold text-orange-500">15%</div>
-                        <p class="mt-2 text-gray-600 font-semibold">人均工時縮減</p>
-                        <p class="text-sm text-gray-500 mt-1">導入自動化系統與流程改善</p>
-                    </div>
-                </div>
-            </section>
-
-            <section id="career-path" class="mb-16">
-                <h2 class="text-3xl font-bold text-center mb-8 text-gray-700">互動式職涯時間軸</h2>
-                 <div class="intro-text max-w-3xl mx-auto text-center text-gray-600 mb-12">
-                    <p>這是一個互動式的職業生涯概覽。請點擊左側時間軸上的公司名稱，右側將會顯示我在該公司的詳細職責、執行的專案以及具體貢獻。這種方式能幫助您更深入地了解我的專業成長軌跡。</p>
-                </div>
-                <div class="md:flex md:space-x-12">
-                    <div class="md:w-1/3 mb-8 md:mb-0">
-                        <div class="relative pl-8">
-                            <div class="timeline-line"></div>
-                            <button id="btn-yuzhi" class="relative w-full text-left p-3 mb-4 timeline-item rounded-lg transition-all duration-300">
-                                <p class="font-bold text-lg">輿智科技</p>
-                                <p class="text-sm text-gray-500">專員 | 2013 - 2015</p>
-                            </button>
-                            <button id="btn-youbike" class="relative w-full text-left p-3 timeline-item rounded-lg transition-all duration-300">
-                                <p class="font-bold text-lg">微笑單車 (YouBike)</p>
-                                <p class="text-sm text-gray-500">營運企劃高級專員 | 2015 - 2025</p>
-                            </button>
+                    <div class="md:w-1/3 mt-8 md:mt-0 md:pl-10">
+                        <div class="text-gray-700 text-base space-y-3 bg-gray-50 p-6 rounded-lg shadow-xl interactive-card border-l-4 border-[--accent-color]"> 
+                            <p class="font-bold text-gray-800 border-b pb-2 text-xl">聯繫資訊</p>
+                            <p>📞 <span class="font-semibold">+886 919 988538</span></p>
+                            <p>📧 <span class="font-semibold">hippop3c@gmail.com</span></p>
+                            <p>🏠 <span class="font-semibold">204 基隆市安樂路一段 208 號五樓</span></p>
                         </div>
                     </div>
+                </div>
+            </header>
+        </section>
 
-                    <div id="job-details" class="md:w-2/3 bg-white p-6 rounded-lg shadow-md">
+        <!-- SECTION 2: 關鍵成就 (KPI Achievements) -->
+        <section id="kpi" class="py-16 md:py-20 scroll-animate">
+            <h2 class="text-3xl font-bold text-center mb-12 text-gray-800 border-b-2 pb-2">量化成果 | 關鍵績效指標 (KPI)</h2>
+
+            <!-- 關鍵 KPI 數據展示 - 數字視覺化 -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- KPI 1: 使用人數成長 -->
+                <div class="interactive-card bg-white p-6 rounded-xl shadow-xl border-t-4 border-green-600 text-center">
+                    <i data-lucide="trending-up" class="w-10 h-10 mx-auto mb-3 text-green-600"></i>
+                    <!-- 數字顏色已使用 Tailwind 類別 text-green-600 指定 -->
+                    <div class="text-5xl font-black text-green-600 mb-2">33%</div>
+                    <p class="text-xl font-bold text-gray-800">YouBike 使用人數成長</p>
+                    <p class="text-gray-500 text-sm mt-1">透過運務規劃模型，直接貢獻營收增長。</p>
+                </div>
+                
+                <!-- KPI 2: 顧客滿意度 -->
+                <div class="interactive-card bg-white p-6 rounded-xl shadow-xl border-t-4 border-blue-600 text-center">
+                    <i data-lucide="award" class="w-10 h-10 mx-auto mb-3 text-blue-600"></i>
+                    <!-- 數字顏色已使用 Tailwind 類別 text-blue-600 指定 -->
+                    <div class="text-5xl font-black text-blue-600 mb-2">95%+</div>
+                    <p class="text-xl font-bold text-gray-800">顧客滿意度維護</p>
+                    <p class="text-gray-500 text-sm mt-1">建立選點指標模型，確保服務品質高效穩定。</p>
+                </div>
+
+                <!-- KPI 3: 流程效率提升 -->
+                <div class="interactive-card bg-white p-6 rounded-xl shadow-xl border-t-4 border-orange-600 text-center">
+                    <i data-lucide="gauge" class="w-10 h-10 mx-auto mb-3 text-orange-600"></i>
+                    <!-- 數字顏色已使用 Tailwind 類別 text-orange-600 指定 -->
+                    <div class="text-5xl font-black text-orange-600 mb-2">15%</div>
+                    <p class="text-xl font-bold text-gray-800">人均工時縮減</p>
+                    <p class="text-gray-500 text-sm mt-1">主導自動化調度系統導入的具體成效。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: 職涯歷程 (Career History) -->
+        <section id="career" class="py-16 md:py-20 scroll-animate">
+            <h2 class="text-3xl font-bold text-center mb-12 text-gray-800 border-b-2 pb-2">卓越職涯歷程與專案</h2>
+            
+            <div class="space-y-10">
+                
+                <!-- Job 1: 輿智資通 (Current) -->
+                <div class="interactive-card bg-white p-8 rounded-xl shadow-2xl border-l-8 border-[--primary-color]">
+                    <div class="flex flex-col md:flex-row justify-between items-start mb-4">
+                        <h3 class="text-3xl font-black text-gray-800">輿智資通</h3>
+                        <p class="text-xl text-[--primary-color] font-semibold mt-1 md:mt-0">規劃專員 | 2015 年 7 月 - 至今</p>
+                    </div>
+                    
+                    <div class="space-y-5">
+                        <div class="bg-amber-50 p-4 rounded-lg border-l-4 border-amber-600">
+                            <h4 class="font-extrabold text-xl text-amber-800">大型政府交通專案與分析</h4>
+                            <ul class="list-disc list-inside mt-3 text-gray-700 space-y-2">
+                                <li>**數據分析：** 負責多項大型政府採購標案的車流量調查、旅行時間優化分析與旅次 O-D 分析。</li>
+                                <li>**決策支持：** 為交通號誌優化、交通衝擊評估提供關鍵數據支持，共參與 4-7 件大型標案。</li>
+                            </ul>
+                        </div>
+                        <div class="bg-indigo-50 p-4 rounded-lg border-l-4 border-indigo-600">
+                            <h4 class="font-extrabold text-xl text-indigo-800">主要參與專案 (深度與廣度)</h4>
+                            <ul class="list-disc list-inside mt-3 text-gray-700 space-y-2">
+                                <li>**智慧運輸：** 台南市公車優先號誌（綠、紅、藍幹線）的時制優化與實施。</li>
+                                <li>**系統維運：** 嘉義縣幹道時制重整及設備維運計畫，確保交通系統高效運作。</li>
+                                <li>**服務評鑑：** 基隆市市區汽車客運業營運及服務評鑑，提升公共運輸服務品質。</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
-            </section>
 
-            <section id="skills-visualization" class="mb-16">
-                <h2 class="text-3xl font-bold text-center mb-8 text-gray-700">核心技能</h2>
-                <div class="intro-text max-w-3xl mx-auto text-center text-gray-600 mb-8">
-                    <p>以下圖表展示了我的核心專業技能熟練度。這些技能是我在過去的專案與日常工作中，用以解決問題、創造價值的關鍵工具。圖表將複雜的技能組以直觀的方式呈現，讓您一目了然。</p>
-                </div>
-                <div class="bg-white p-6 rounded-lg shadow-md">
-                    <div class="chart-container">
-                        <canvas id="skillsChart"></canvas>
+                <!-- Job 2: 微笑單車 (YouBike) -->
+                <div class="interactive-card bg-white p-8 rounded-xl shadow-2xl border-l-8 border-yellow-500">
+                    <div class="flex flex-col md:flex-row justify-between items-start mb-4">
+                        <h3 class="text-3xl font-black text-gray-800">微笑單車 (YouBike)</h3>
+                        <p class="text-xl text-yellow-600 font-semibold mt-1 md:mt-0">營運企劃高級專員 | 2013 年 4 月 - 2015 年 7 月</p>
+                    </div>
+                    
+                    <div class="space-y-5">
+                        <div class="bg-emerald-50 p-4 rounded-lg border-l-4 border-emerald-600">
+                            <h4 class="font-extrabold text-xl text-emerald-800">數據驅動營運優化</h4>
+                            <ul class="list-disc list-inside mt-3 text-gray-700 space-y-2">
+                                <li>**運務規劃：** 建立區域起訖關係與時段車輛配置模型，使 YouBike 使用人數較同期<b class="text-red-600">成長 33%</b>。</li>
+                                <li>**顧客滿意度：** 建立選點指標模型，成功使顧客滿意度維持 <b class="text-red-600">95% 以上</b>。</li>
+                                <li>**效率提升：** 主導自動化與調度系統導入，將人均工時顯著縮減 <b class="text-red-600">15%</b>。</li>
+                            </ul>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-600">
+                            <h4 class="font-extrabold text-xl text-blue-800">核心專案領導</h4>
+                            <ul class="list-disc list-inside mt-3 text-gray-700 space-y-2">
+                                <li>**YouBike 2.0 專案：** 擔任專案負責人，負責新一代系統的營運流程設計與需求確認。</li>
+                                <li>**淨零調度專案：** 擔任專案負責人，優化調度策略，符合環保與效率的雙重目標。</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
-            </section>
-        </main>
+            </div>
+        </section>
 
-        <footer class="text-center pt-8 border-t border-gray-200">
-            <h3 class="text-2xl font-bold text-gray-700 mb-4">教育背景</h3>
-            <div class="flex flex-col md:flex-row justify-center items-center md:space-x-8 space-y-4 md:space-y-0 text-gray-600">
-                <div class="text-center">
-                    <p class="font-semibold">淡江大學 | 運輸管理學系</p>
-                    <p class="text-sm text-gray-500">2012 年肄業</p>
+        <!-- SECTION 4: 核心技能 (Core Skills) -->
+        <section id="skills" class="py-16 md:py-20 scroll-animate">
+            <h2 class="text-3xl font-bold text-center mb-12 text-gray-800 border-b-2 pb-2">核心專業技能樹</h2>
+
+            <div class="space-y-12">
+                <!-- 數據分析與程式語言 -->
+                <div class="bg-white p-8 rounded-xl shadow-2xl interactive-card">
+                    <h3 class="text-3xl font-bold text-gray-800 border-b-2 border-indigo-300 pb-3 mb-8 flex items-center">
+                        <i data-lucide="database" class="w-7 h-7 mr-3 text-indigo-600"></i> 數據分析與模型建構
+                    </h3>
+                    <div id="data-skills" class="space-y-8 md:grid md:grid-cols-2 md:gap-x-12">
+                        <!-- R 語言 -->
+                        <div class="skill-item">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-bold text-lg text-gray-700 flex items-center"><i data-lucide="code" class="w-5 h-5 mr-2 text-indigo-500"></i> R 語言 (統計分析/模型建構)</span>
+                                <span class="text-base font-extrabold text-indigo-600">85%</span>
+                            </div>
+                            <div class="bg-gray-200 rounded-full h-4 overflow-hidden">
+                                <div class="skill-bar-fill bg-indigo-500 h-4 rounded-full" data-level="85%"></div>
+                            </div>
+                        </div>
+                        <!-- Google Studio (Looker Studio) -->
+                        <div class="skill-item">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-bold text-lg text-gray-700 flex items-center"><i data-lucide="monitor" class="w-5 h-5 mr-2 text-indigo-500"></i> Google Studio (專業儀表板製作)</span>
+                                <span class="text-base font-extrabold text-indigo-600">80%</span>
+                            </div>
+                            <div class="bg-gray-200 rounded-full h-4 overflow-hidden">
+                                <div class="skill-bar-fill bg-indigo-500 h-4 rounded-full" data-level="80%"></div>
+                            </div>
+                        </div>
+                        <!-- 交通專業分析 -->
+                        <div class="skill-item">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-bold text-lg text-gray-700 flex items-center"><i data-lucide="traffic-cone" class="w-5 h-5 mr-2 text-indigo-500"></i> 交通/營運數據模型 (O-D/時制)</span>
+                                <span class="text-base font-extrabold text-indigo-600">90%</span>
+                            </div>
+                            <div class="bg-gray-200 rounded-full h-4 overflow-hidden">
+                                <div class="skill-bar-fill bg-indigo-500 h-4 rounded-full" data-level="90%"></div>
+                            </div>
+                        </div>
+                        <!-- 專案管理與協調 -->
+                        <div class="skill-item">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-bold text-lg text-gray-700 flex items-center"><i data-lucide="projector" class="w-5 h-5 mr-2 text-indigo-500"></i> 專案管理與跨部門協調</span>
+                                <span class="text-base font-extrabold text-indigo-600">95%</span>
+                            </div>
+                            <div class="bg-gray-200 rounded-full h-4 overflow-hidden">
+                                <div class="skill-bar-fill bg-indigo-500 h-4 rounded-full" data-level="95%"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="text-center">
-                    <p class="font-semibold">真理大學 | 數學系</p>
+
+                <!-- 辦公室應用技能 (高熟練度) -->
+                <div class="bg-white p-8 rounded-xl shadow-2xl interactive-card">
+                    <h3 class="text-3xl font-bold text-gray-800 border-b-2 border-green-300 pb-3 mb-8 flex items-center">
+                        <i data-lucide="file-text" class="w-7 h-7 mr-3 text-green-600"></i> 專案文件與辦公室效率
+                    </h3>
+                    <div id="office-skills" class="space-y-8 md:grid md:grid-cols-3 md:gap-x-12">
+                        <!-- Microsoft Excel -->
+                        <div class="skill-item">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-bold text-lg text-gray-700">Excel (高級數據處理)</span>
+                                <span class="text-base font-extrabold text-green-600">95%</span>
+                            </div>
+                            <div class="bg-gray-200 rounded-full h-4 overflow-hidden">
+                                <div class="skill-bar-fill bg-green-500 h-4 rounded-full" data-level="95%"></div>
+                            </div>
+                        </div>
+                        <!-- Microsoft PowerPoint -->
+                        <div class="skill-item">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-bold text-lg text-gray-700">PowerPoint (專業簡報)</span>
+                                <span class="text-base font-extrabold text-green-600">90%</span>
+                            </div>
+                            <div class="bg-gray-200 rounded-full h-4 overflow-hidden">
+                                <div class="skill-bar-fill bg-green-500 h-4 rounded-full" data-level="90%"></div>
+                            </div>
+                        </div>
+                        <!-- Microsoft Word -->
+                        <div class="skill-item">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-bold text-lg text-gray-700">Word (技術文件撰寫)</span>
+                                <span class="text-base font-extrabold text-green-600">88%</span>
+                            </div>
+                            <div class="bg-gray-200 rounded-full h-4 overflow-hidden">
+                                <div class="skill-bar-fill bg-green-500 h-4 rounded-full" data-level="88%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 教育背景與頁腳 -->
+        <footer class="text-center pt-10 border-t-2 border-gray-300 mt-16 pb-10 scroll-animate">
+            <h3 class="text-2xl font-bold text-gray-700 mb-4">學術背景</h3>
+            <div class="flex flex-col md:flex-row justify-center items-center md:space-x-12 space-y-4 md:space-y-0 text-gray-600">
+                <div class="text-center p-4 bg-white rounded-lg shadow-md interactive-card w-full md:w-auto border-l-2 border-gray-200">
+                    <p class="font-semibold text-lg text-[--primary-color]">淡江大學 | 運輸管理學系</p>
+                    <p class="text-sm text-gray-500">2012 年畢業</p>
+                </div>
+                <div class="text-center p-4 bg-white rounded-lg shadow-md interactive-card w-full md:w-auto border-l-2 border-gray-200">
+                    <p class="font-semibold text-lg text-[--primary-color]">真理大學 | 數學系</p>
                     <p class="text-sm text-gray-500">2009 年畢業</p>
                 </div>
             </div>
+            <p class="mt-8 text-xs text-gray-400">本互動式履歷由 Gemini 協助製作。</p>
         </footer>
 
     </div>
 
     <script>
-        const jobData = {
-            youbike: {
-                title: '微笑單車 (YouBike)',
-                position: '營運企劃高級專員',
-                content: `
-                    <div class="space-y-4">
-                        <div>
-                            <h4 class="font-semibold text-lg text-gray-800">營運優化與績效管理</h4>
-                            <ul class="list-disc list-inside mt-2 text-gray-600 space-y-1">
-                                <li><b>策略規劃：</b>運用數據分析，根據不同時段與區域的騎乘關係，建立預先車輛配置模型，有效減少無車可借還的狀況。</li>
-                                <li><b>成果：</b>成功使 YouBike 使用人數較同期成長 <b>33%</b>，並顯著增加營收。</li>
-                                <li><b>顧客滿意度：</b>建立選點指標模型，使顧客滿意度維持 <b>95% 以上</b>。</li>
-                                <li><b>數據分析：</b>彙整每日營運數據，並進行圖表化分析，為決策層提供改善策略與方向。</li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-lg text-gray-800">專案管理與流程改善</h4>
-                            <ul class="list-disc list-inside mt-2 text-gray-600 space-y-1">
-                                <li><b>系統導入：</b>主導建立自動化與調度系統，成功將人均工時縮減 <b>15%</b>。</li>
-                                <li><b>專案負責人：</b>擔任 YouBike 2.0 專案與淨零調度專案的負責人，從規劃到執行皆能獨立完成。</li>
-                                <li><b>標準作業流程 (SOP)：</b>制定內部事件應對 SOP，並建立跨組協調機制，提升團隊運作效率。</li>
-                            </ul>
-                        </div>
-                    </div>
-                `
-            },
-            yuzhi: {
-                title: '輿智科技',
-                position: '專員',
-                content: `
-                    <div class="space-y-4">
-                        <div>
-                            <h4 class="font-semibold text-lg text-gray-800">交通專案執行與分析</h4>
-                            <ul class="list-disc list-inside mt-2 text-gray-600 space-y-1">
-                                <li><b>專案參與：</b>參與多項大型政府交通採購標案，負責車流量調查、旅行時間與旅次分析。</li>
-                                <li><b>專業分析：</b>進行交通號誌優化與交通衝擊評估，為政府單位提供數據支持與解決方案。</li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-lg text-gray-800">主要參與專案</h4>
-                            <ul class="list-disc list-inside mt-2 text-gray-600 space-y-1">
-                                <li>104、105 年台南市公車優先號誌（綠、紅、藍幹線）</li>
-                                <li>102-104 年「嘉義縣幹道時制重整及設備維運計畫」</li>
-                                <li>基隆市市區汽車客運業營運及服務評鑑</li>
-                            </ul>
-                        </div>
-                    </div>
-                `
-            }
-        };
-
         document.addEventListener('DOMContentLoaded', () => {
-            const btnYuzhi = document.getElementById('btn-yuzhi');
-            const btnYoubike = document.getElementById('btn-youbike');
-            const detailsContainer = document.getElementById('job-details');
+            // 載入 Lucide Icons
+            lucide.createIcons();
 
-            function updateJobDetails(jobKey) {
-                const data = jobData[jobKey];
-                detailsContainer.innerHTML = `
-                    <h3 class="text-2xl font-bold text-gray-800 mb-1">${data.title}</h3>
-                    <p class="text-md text-[#4A90E2] font-semibold mb-4">${data.position}</p>
-                    ${data.content}
-                `;
+            const sections = document.querySelectorAll('.scroll-animate');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const skillBars = document.querySelectorAll('.skill-bar-fill');
+            const navbar = document.getElementById('navbar');
 
-                if (jobKey === 'yuzhi') {
-                    btnYuzhi.classList.add('active', 'bg-blue-100');
-                    btnYoubike.classList.remove('active', 'bg-blue-100');
-                } else {
-                    btnYoubike.classList.add('active', 'bg-blue-100');
-                    btnYuzhi.classList.remove('active', 'bg-blue-100');
+            // --- 滾動監聽器和動畫邏輯 ---
+
+            // 1. 設置 Intersection Observer 檢查元素是否進入視圖
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate-active');
+                        // 如果是技能條 section，觸發技能條動畫
+                        if (entry.target.id === 'skills') {
+                            setTimeout(triggerSkillBars, 300);
+                        }
+                    } else {
+                        // 可以選擇在滾出視圖時移除動畫，讓它下次再滾入時重新播放
+                        // entry.target.classList.remove('animate-active');
+                    }
+                    
+                    // 2. 更新導航列活躍狀態
+                    updateNavLinkStatus();
+                });
+            }, { 
+                rootMargin: '0px',
+                threshold: 0.1 // 當元素 10% 進入視圖時觸發
+            });
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+            
+            // 3. 初始載入時，頂部元素立即激活
+            sections[0].classList.add('animate-active');
+            
+            // FIX: 確保初始載入時，第一個導航連結處於活躍狀態，讓用戶知道導航是互動的
+            if (navLinks.length > 0) {
+                navLinks[0].classList.add('active');
+            }
+
+
+            // --- 技能條動畫啟動函數 ---
+            let skillsTriggered = false;
+            function triggerSkillBars() {
+                if (!skillsTriggered) {
+                    skillsTriggered = true;
+                    skillBars.forEach(bar => {
+                        const level = bar.dataset.level;
+                        bar.style.width = level;
+                    });
                 }
             }
 
-            btnYuzhi.addEventListener('click', () => updateJobDetails('yuzhi'));
-            btnYoubike.addEventListener('click', () => updateJobDetails('youbike'));
-            
-            updateJobDetails('yuzhi');
 
-            const ctx = document.getElementById('skillsChart').getContext('2d');
-            const skillsChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['數據分析 (Excel, R)', '專案管理', '營運規劃', 'Google Studio', '流程改善 (SOP)'],
-                    datasets: [{
-                        label: '技能熟練度',
-                        data: [95, 90, 90, 85, 88],
-                        backgroundColor: [
-                            'rgba(74, 144, 226, 0.6)',
-                            'rgba(34, 197, 94, 0.6)',
-                            'rgba(249, 115, 22, 0.6)',
-                            'rgba(234, 179, 8, 0.6)',
-                            'rgba(139, 92, 246, 0.6)'
-                        ],
-                        borderColor: [
-                             'rgba(74, 144, 226, 1)',
-                             'rgba(34, 197, 94, 1)',
-                            'rgba(249, 115, 22, 1)',
-                            'rgba(234, 179, 8, 1)',
-                            'rgba(139, 92, 246, 1)'
-                        ],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return ` 熟練度: ${context.raw}%`;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            beginAtZero: true,
-                            max: 100,
-                             ticks: {
-                                callback: function(value) {
-                                    return value + '%'
-                                }
-                            }
-                        },
-                        y: {
-                            ticks: {
-                                autoSkip: false,
-                                callback: function(value, index, values) {
-                                    const label = this.getLabelForValue(value);
-                                    if (label.length > 16) {
-                                        return label.substring(0, 16) + '...';
-                                    }
-                                    return label;
-                                }
-                            }
-                        }
+            // --- 導航列狀態更新函數 ---
+            function updateNavLinkStatus() {
+                let currentSectionId = '';
+                // 找到最靠近頂部且已進入視圖的 section
+                sections.forEach(section => {
+                    const rect = section.getBoundingClientRect();
+                    // 判斷 section 頂部是否在視窗頂部上方或附近 (<= 150px 偏移)
+                    if (rect.top <= navbar.offsetHeight + 150) { 
+                        currentSectionId = section.id;
                     }
-                }
-            });
+                });
+
+                // 更新 active 類別
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${currentSectionId}`) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+
+            // 確保滾動時也能更新狀態
+            window.addEventListener('scroll', updateNavLinkStatus);
+            // 初始執行一次 (在 FIX 之後執行，以確保滾動時的狀態覆蓋初始化狀態)
+            updateNavLinkStatus();
         });
     </script>
 </body>
 </html>
-
-
 
